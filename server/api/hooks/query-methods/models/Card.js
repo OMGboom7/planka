@@ -75,7 +75,13 @@ const getByEndlessListId = async (listId, { before, search, userIds, labelIds })
     if (search) {
       if (search.startsWith('/')) {
         queryValues.push(search.substring(1));
-        query += ` AND (card.name ~* $${queryValues.length} OR card.description ~* $${queryValues.length})`;
+        query += ` AND (card.name ~* $${queryValues.length} OR card.description ~* $${queryValues.length} OR EXISTS (
+          SELECT 1
+          FROM task_list search_task_list
+          LEFT JOIN task search_task ON search_task.task_list_id = search_task_list.id
+          WHERE search_task_list.card_id = card.id
+            AND (search_task_list.name ~* $${queryValues.length} OR search_task.name ~* $${queryValues.length})
+        ))`;
       } else {
         const searchParts = buildSearchParts(search);
 
@@ -85,7 +91,15 @@ const getByEndlessListId = async (listId, { before, search, userIds, labelIds })
             return `'%' || $${queryValues.length} || '%'`;
           });
 
-          query += ` AND ((card.name ILIKE ALL(ARRAY[${ilikeValues.join(', ')}])) OR (card.description ILIKE ALL(ARRAY[${ilikeValues.join(', ')}])))`;
+          const ilikeArray = `ARRAY[${ilikeValues.join(', ')}]`;
+
+          query += ` AND ((card.name ILIKE ALL(${ilikeArray})) OR (card.description ILIKE ALL(${ilikeArray})) OR EXISTS (
+            SELECT 1
+            FROM task_list search_task_list
+            LEFT JOIN task search_task ON search_task.task_list_id = search_task_list.id
+            WHERE search_task_list.card_id = card.id
+              AND (search_task_list.name ILIKE ALL(${ilikeArray}) OR search_task.name ILIKE ALL(${ilikeArray}))
+          ))`;
         }
       }
     }

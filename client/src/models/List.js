@@ -13,6 +13,17 @@ import Config from '../constants/Config';
 import { ListSortFieldNames, ListTypes, ListTypeStates, SortOrders } from '../constants/Enums';
 import LIST_TYPE_STATE_BY_TYPE from '../constants/ListTypeStateByType';
 
+const getTaskListSearchText = (cardModel) =>
+  cardModel
+    .getTaskListsQuerySet()
+    .toModelArray()
+    .flatMap((taskListModel) => [
+      taskListModel.name,
+      ...taskListModel.getTasksQuerySet().toRefArray().map((taskModel) => taskModel.name),
+    ])
+    .filter(Boolean)
+    .join('\n');
+
 const POSITION_BY_LIST_TYPE = {
   [ListTypes.ARCHIVE]: Number.MAX_SAFE_INTEGER - 1,
   [ListTypes.TRASH]: Number.MAX_SAFE_INTEGER,
@@ -339,19 +350,23 @@ export default class extends BaseModel {
         cardModels = cardModels.filter(
           (cardModel) =>
             searchRegex.test(cardModel.name) ||
-            (cardModel.description && searchRegex.test(cardModel.description)),
+            (cardModel.description && searchRegex.test(cardModel.description)) ||
+            searchRegex.test(getTaskListSearchText(cardModel)),
         );
       } else {
         const searchParts = buildSearchParts(this.board.search);
 
         cardModels = cardModels.filter((cardModel) => {
-          const name = cardModel.name.toLowerCase();
-          const description = cardModel.description && cardModel.description.toLowerCase();
+          const searchText = [
+            cardModel.name,
+            cardModel.description,
+            getTaskListSearchText(cardModel),
+          ]
+            .filter(Boolean)
+            .join('\n')
+            .toLowerCase();
 
-          return searchParts.every(
-            (searchPart) =>
-              name.includes(searchPart) || (description && description.includes(searchPart)),
-          );
+          return searchParts.every((searchPart) => searchText.includes(searchPart));
         });
       }
     }
