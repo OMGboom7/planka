@@ -45,7 +45,7 @@ services:
 
       # The default application language used as a fallback when a user's language is not set.
       # This language is also used for per-board notifications.
-      # - DEFAULT_LANGUAGE=en-US
+      - DEFAULT_LANGUAGE=zh-CN
 
       # Do not comment out DEFAULT_ADMIN_EMAIL if you want to prevent this user from being edited/deleted
       # - DEFAULT_ADMIN_EMAIL=demo@demo.demo
