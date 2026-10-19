@@ -13,3 +13,8 @@ yarn.lock
 
 # Chart dependencies
 **/charts/*.tgz
+
+# Local CA certificates for outgoing notifications
+certs/*.crt
+certs/*.pem
+certs/*.key

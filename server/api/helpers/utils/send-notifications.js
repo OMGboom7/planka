@@ -3,6 +3,7 @@
  * Licensed under the Fair Use License: https://github.com/plankanban/planka/blob/master/LICENSE.md
  */
 
+const fs = require('fs');
 const { execFile } = require('child_process');
 const path = require('path');
 const util = require('util');
@@ -32,6 +33,23 @@ module.exports = {
 
   async fn(inputs) {
     try {
+      const env = {
+        PATH: process.env.PATH,
+        HOME: process.env.HOME,
+        HTTP_PROXY: sails.config.custom.outgoingProxy,
+        HTTPS_PROXY: sails.config.custom.outgoingProxy,
+      };
+
+      if (process.env.REQUESTS_CA_BUNDLE) {
+        if (fs.existsSync(process.env.REQUESTS_CA_BUNDLE)) {
+          env.REQUESTS_CA_BUNDLE = process.env.REQUESTS_CA_BUNDLE;
+        } else {
+          sails.log.warn(
+            `REQUESTS_CA_BUNDLE points to missing file: ${process.env.REQUESTS_CA_BUNDLE}`,
+          );
+        }
+      }
+
       await promisifyExecFile(
         PYTHON_PATH,
         [
@@ -41,10 +59,7 @@ module.exports = {
           JSON.stringify(inputs.bodyByFormat),
         ],
         {
-          env: {
-            HTTP_PROXY: sails.config.custom.outgoingProxy,
-            HTTPS_PROXY: sails.config.custom.outgoingProxy,
-          },
+          env,
         },
       );
     } catch (error) {

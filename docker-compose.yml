@@ -4,6 +4,8 @@ services:
     restart: on-failure
     volumes:
       - data:/app/data
+      # Optional internal CA used by outgoing Apprise notifications (see certs/README.md)
+      - ./certs:/app/certs:ro
       # - ./terms:/app/terms/custom
     # Optionally override this to your user/group
     # user: 1000:1000
@@ -46,6 +48,10 @@ services:
       # The default application language used as a fallback when a user's language is not set.
       # This language is also used for per-board notifications.
       - DEFAULT_LANGUAGE=zh-CN
+
+      # CA bundle used by the Python notification sender for self-signed/internal HTTPS endpoints.
+      # The file is mounted read-only from ./certs. Unset it to use the bundled certifi store.
+      - REQUESTS_CA_BUNDLE=/app/certs/internal-ca.crt
 
       # Do not comment out DEFAULT_ADMIN_EMAIL if you want to prevent this user from being edited/deleted
       # - DEFAULT_ADMIN_EMAIL=demo@demo.demo
