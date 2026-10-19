@@ -4,6 +4,10 @@
 import sys
 import json
 import logging
+import hashlib
+import os
+import tempfile
+import certifi
 import apprise
 
 
@@ -17,6 +21,43 @@ BLOCKED_SCHEMAS_SET = {
     'macosx',
     'windows',
 }
+
+
+def build_ca_bundle():
+    custom_bundle = os.environ.get('REQUESTS_CA_BUNDLE')
+    if not custom_bundle:
+        return
+
+    if not os.path.isfile(custom_bundle):
+        print(f'[ca] CA bundle not found: {custom_bundle}', file=sys.stderr)
+        os.environ.pop('REQUESTS_CA_BUNDLE', None)
+        return
+
+    try:
+        with open(custom_bundle, 'rb') as custom_file:
+            custom_data = custom_file.read()
+
+        with open(certifi.where(), 'rb') as public_file:
+            public_data = public_file.read()
+
+        digest = hashlib.sha256(custom_data + public_data).hexdigest()[:16]
+        merged_path = os.path.join(tempfile.gettempdir(), f'planka-ca-{digest}.pem')
+
+        if not os.path.exists(merged_path):
+            temporary_path = f'{merged_path}.tmp'
+            with open(temporary_path, 'wb') as merged_file:
+                merged_file.write(custom_data)
+                merged_file.write(b'\n')
+                merged_file.write(public_data)
+            os.replace(temporary_path, merged_path)
+
+        os.environ['REQUESTS_CA_BUNDLE'] = merged_path
+    except OSError as error:
+        print(f'[ca] Failed to build CA bundle: {error}', file=sys.stderr)
+        os.environ.pop('REQUESTS_CA_BUNDLE', None)
+
+
+build_ca_bundle()
 
 
 last_apprise_message = None
