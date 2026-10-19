@@ -11,9 +11,9 @@
   "Trash": "垃圾桶",
   "You Were Added to Card": "您已被加入卡片",
   "You Were Mentioned in Comment": "您在留言中被提及",
-  "%s added you to %s on %s": "%s 在 %s 將您加入 %s",
-  "%s created %s in %s on %s": "%s 在 %s 的 %s 中建立了 %s",
-  "%s left a new comment to %s on %s": "%s 在 %s 對 %s 留下了新留言",
-  "%s mentioned you in %s on %s": "%s 在 %s 的 %s 中提及了您",
-  "%s moved %s from %s to %s on %s": "%s 在 %s 將 %s 從 %s 移動到 %s"
+  "%s added you to %s on %s": "%s 將您加入 %s（%s）",
+  "%s created %s in %s on %s": "%s 建立了卡片 %s（清單 %s，看板 %s）",
+  "%s left a new comment to %s on %s": "%s 在 %s 留下了新留言（%s）",
+  "%s mentioned you in %s on %s": "%s 在 %s 中提及了您（%s）",
+  "%s moved %s from %s to %s on %s": "%s 將 %s 從 %s 移動到 %s（%s）"
 }
